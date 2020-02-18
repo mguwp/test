@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <title>隐私策略调用示例</title>
+	
+	    <meta name="content-type" content="text/html; charset=UTF-8">
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	    <!-- 
+	    	此处引用MG的js文件，若游戏协议是https，则引用的文件地址为：https://127.0.0.1/web/websdk.js
+	     -->
+		<script language="javascript" src="https://api.mguwp.net/web/websdk.js" ></script>
+		<script language="javascript" src="http://192.168.1.8/web/websdk.js" ></script>
+		<script>
+			var appKey="71A47C2518";//应用标识，创建应用时产生
+			var callback="";
+			//comment中不能出现半角逗号（,）
+			function openLogin(){
+				var jsonLoginPara=new Object();
+				openMgLogin(appKey,JSON.stringify(jsonLoginPara));
+			}
+			
+			function openStore(goodsKey,comment){
+				var jsonStorePara=new Object();
+				jsonStorePara.goodsKey=goodsKey;
+				jsonStorePara.callback=callback;
+				jsonStorePara.comment=comment;
+				openMgStore(appKey,JSON.stringify(jsonStorePara));
+			}
+			
+			function openCsd(){
+				var jsonCsdPara=new Object();
+				openMgCsd(appKey,JSON.stringify(jsonCsdPara));
+			}
+		</script>
+		
+		<script language="javascript">
+			//接收MG用户登录状态通知，用户登录成功后会调用此方法，若用户未登录或登录未成功，则不调用该方法
+			//此方法由cp自已实现逻辑，以下内容为参考
+			//result=登录结果；loginResult为用户登录信息，其中userId=用户标识；token=用户登录状态标识；account=用户名，result=success时代表登录成功，其它失败。
+			function MgLoginResult(result,loginResult){
+				var msg="失败";
+				var userId="",token="",account="";
+				if(result=="success"){
+					msg="成功";
+					var jsonLoginResult=JSON.parse(loginResult);
+					userId=jsonLoginResult.userId;
+					token=jsonLoginResult.token;
+					account=jsonLoginResult.account;
+				}
+				
+				document.getElementById("sdkmsg").innerHTML="登录结果："+msg+"<br>用户名："+userId
+						+"<br>token："+token+"<br>account："+account;
+				//拿到userId,token两个参数及appKey，去mg服务器验证该用户的登录状态。若返回200，则表明登录成功
+				//验证登录状态一般是在服务器端实现（即在此处向cp服务器发验证请求，然后由cp服务器向mg服务器发验证请求，然后由cp服务器返回此处）
+				
+				//验证成功后，实现cp游戏内部用户的登录（注册），此步可以与上一步合并，由cp服务器向mg服务器发验证请求后处理。
+				
+				//登录成功后，游戏处理
+				
+			}
+			
+			//接收MG支付状态通知，用户关闭支付窗口后会调用此方法
+			//此方法由cp自已实现逻辑，以下内容为参考
+			//result=支付结果；若result=success代表支付成功，其它则为失败。
+			//goodsKey=商品标识；goodsNum=商品数量；
+			//comment=用户自定义参数，由用户发起支付时赋值，支付成功后原本返回；
+			//goodsName=商品名称；goodsTag=商品标签，此值在MG开发者平台创建商品时填写，可以用来进行校验
+			function MgPaymentResult(result,paymentResult){
+				var msg="失败";
+				var orderKey="",goodsKey="",goodsTag="",goodsNum="",coinUnit="",price="",customerKey="",comment="";
+				if(result=="success"){
+					msg="成功";
+					var jsonPaymentResult=JSON.parse(paymentResult);
+					orderKey=jsonPaymentResult.orderKey;
+					goodsKey=jsonPaymentResult.goodsKey;
+					goodsTag=jsonPaymentResult.goodsTag;
+					goodsNum=jsonPaymentResult.goodsNum;
+					coinUnit=jsonPaymentResult.coinUnit;
+					price=jsonPaymentResult.price;
+					customerKey=jsonPaymentResult.customerKey;
+					comment=jsonPaymentResult.comment;
+				}
+				document.getElementById("sdkmsg").innerHTML="支付结果："+msg+"<br>订单号："+orderKey+"<br>商品Key："+goodsKey
+						+"<br>商品标签："+goodsTag+"<br>商品数量："+goodsNum+"<br>货币单位："+coinUnit
+						+"<br>商品价格："+price+"<br>用户ID："+customerKey+"<br>comment："+decodeURIComponent(comment);
+						
+				
+				//除在此通知以外，MG服务器会把支付结果发送到CP服务器，CP服务器拿到回调后，给玩家发货
+				//给玩家发货以服务器端回调通知为准。
+				
+			}
+		</script>
+	</head>
+
+	<body align="center">
+		<p>登录示例</p>
+		<p align=center valign="middle" ><br>
+		    <a href="#" onclick="openLogin();">登录</a><br>
+		</p>
+		<p>支付示例</p>
+	  	<p align=center valign="middle" ><br>
+		   	<a href="#" onclick="openStore('CF3EC43DB93F38B','comment');"> 6元档</a><br><br>
+			<a href="#" onclick="openStore('CF3EC43DB93F38B','comment');"> 12元档</a><br>
+		</p>
+		<p align=center valign="middle" ><br>
+		    <a href="#" onclick="openCsd();">社区</a><br>
+		</p>
+	    <p id="sdkmsg"></p>
+	    
+	    <script>
+		    MgSDK.loadCsd({
+		    	color:"white",
+		    	width:"90px",
+		    	height:"90px",
+		    	left:"80%",
+		    	top:"20%",
+		    	//container:"sdkmsg",	//固定到某一位置
+		    	sdktype:"2",
+		    	size:"1020X800",
+		    	appKey:"71A47C2518"
+		    });
+	    	//loadMgBsd();
+	    </script>
+	</body>
+</html>
